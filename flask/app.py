@@ -300,6 +300,7 @@ class Flask(_PackageBoundObject):
         'LOGGER_NAME':                          None,
         'LOGGER_HANDLER_POLICY':               'always',
         'SERVER_NAME':                          None,
+        'ALLOW_ALL_HTTP_HOSTS':                 False,
         'APPLICATION_ROOT':                     None,
         'SESSION_COOKIE_NAME':                  'session',
         'SESSION_COOKIE_DOMAIN':                None,
@@ -1767,8 +1768,13 @@ class Flask(_PackageBoundObject):
            URL adapter is created for the application context.
         """
         if request is not None:
+            if self.config['ALLOW_ALL_HTTP_HOSTS']:
+                server_name = None
+            else:
+                server_name = self.config['SERVER_NAME']
+
             return self.url_map.bind_to_environ(request.environ,
-                server_name=self.config['SERVER_NAME'])
+                server_name=server_name)
         # We need at the very least the server name to be set for this
         # to work.
         if self.config['SERVER_NAME'] is not None:
