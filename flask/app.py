@@ -288,6 +288,7 @@ class Flask(_PackageBoundObject):
         'PERMANENT_SESSION_LIFETIME':           timedelta(days=31),
         'USE_X_SENDFILE':                       False,
         'SERVER_NAME':                          None,
+        'ALLOW_ALL_HTTP_HOSTS':                 False,
         'APPLICATION_ROOT':                     '/',
         'SESSION_COOKIE_NAME':                  'session',
         'SESSION_COOKIE_DOMAIN':                None,
@@ -2010,6 +2011,11 @@ class Flask(_PackageBoundObject):
             matching. Use :attr:`subdomain_matching` instead.
         """
         if request is not None:
+            if self.config['ALLOW_ALL_HTTP_HOSTS']:
+                server_name = None
+            else:
+                server_name = self.config['SERVER_NAME']
+
             # If subdomain matching is disabled (the default), use the
             # default subdomain in all cases. This should be the default
             # in Werkzeug but it currently does not have that feature.
@@ -2017,7 +2023,7 @@ class Flask(_PackageBoundObject):
                          if not self.subdomain_matching else None)
             return self.url_map.bind_to_environ(
                 request.environ,
-                server_name=self.config['SERVER_NAME'],
+                server_name=server_name,
                 subdomain=subdomain)
         # We need at the very least the server name to be set for this
         # to work.
